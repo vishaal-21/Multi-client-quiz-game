@@ -3,7 +3,8 @@ from timeit import default_timer as timer
 from threading import Thread
 import sys, select, tkinter, time
 
-HOST='';PORT=33000
+HOST=''
+PORT=8080
 BUFFERSIZE=1024
 
 HOST=input('Enter host: ')
