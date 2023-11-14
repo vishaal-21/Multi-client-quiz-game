@@ -1,46 +1,10 @@
-from socket import AF_INET,socket,SOCK_STREAM
-from threading import Thread
-import time
-
 clients = {}
-addresses= {}
 times = []
 threads = []
 
-HOST =''
-PORT = 33000
-BUFFERSIZE=1024
-CURR_CLIENT_NO = 0
-TOT_CLIENT_NO = 5
-ADDR=(HOST,PORT)
-SERVER=socket(AF_INET,SOCK_STREAM)
-SERVER.bind(ADDR)
-
 all_times = []
 
-def accept_in_connections():
-	global CURR_CLIENT_NO,TOT_CLIENT_NO
-	while CURR_CLIENT_NO < TOT_CLIENT_NO:
-		CURR_CLIENT_NO+=1
-		client,client_addr=SERVER.accept()
-		print("%s:%s has joined the quiz."%client_addr)
-		# client.send(bytes("Greetings from the quiz master!","utf8"))
-		# client.send(bytes("Please enter your name and press enter","utf8"))
-		addresses[client]=client_addr
-		thr = Thread(target=handle_client,args=(client,))
-		threads.append(thr)
-		thr.start()
-		time.sleep(.1)
-
-	# print("joining")
-	for t in threads:
-		t.join()
-	time.sleep(1)
-
-	# print("test")
-
 def handle_client(client):
-
 	name=client.recv(BUFFERSIZE).decode("utf8")
 	welcome='Welcome %s! Please wait for the other clients to join' %name
 	client.send(bytes(welcome,"utf8"))

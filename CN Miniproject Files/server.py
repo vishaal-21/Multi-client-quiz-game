@@ -2,7 +2,7 @@ import socket
 import threading
 import time
 
-HOST=""
+HOST="127.0.0.1"
 PORT=8080
 BUFFERSIZE=1024
 CURR_CLIENT_NO = 0
@@ -10,7 +10,14 @@ TOT_CLIENT_NO=0
 SERVER=None
 
 connections=[]
-addresses=[]
+addresses={}
+
+def handle_client(client):
+    
+
+
+    client.close()
+    
 
 def accepting_client_connections():
     global CURR_CLIENT_NO
@@ -18,11 +25,14 @@ def accepting_client_connections():
     
     while CURR_CLIENT_NO<TOT_CLIENT_NO:
         CURR_CLIENT_NO+=1
-        connection,address=SERVER.accept()
+        client,client_address=SERVER.accept()
         
-        print("Connection "+str(CURR_CLIENT_NO)+" : "+address[0])
-        connection.send("Welcome to the quiz!".encode("utf-8"))
-        connection.close()
+        print("Connection "+str(CURR_CLIENT_NO)+" : "+client_address[0])
+        client.send("Welcome to the quiz!".encode("utf-8"))
+
+        addresses[client]=client_address
+        client_handler_thr=threading.Thread(target=handle_client,args=(client,))
+        client_handler_thr.start()
 
 
 def Main():

@@ -1,4 +1,5 @@
 import socket
+import main
 from threading import Thread
 import time,sys,select
 import tkinter
@@ -11,17 +12,13 @@ BUFFERSIZE=4096
 HOST=input("Enter Host address : ")
 PORT=int(input("Enter port number : "))
 
-client_socket=socket(socket.AF_INET,socket.SOCK_STREAM)
-client_socket.connect((HOST,PORT))
+CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+CLIENT.connect((HOST,PORT))
 
-def main():
-    CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    CLIENT.connect((HOST,PORT))
-    
-    data=CLIENT.recv(4096)
-    print(data.decode())
+def start_game():
+    print("hello")
 
-    CLIENT.close()
-    
-if __name__ == "__main__":
-    main()
+main.initialize()
+client_thread=Thread(target=start_game)
+client_thread.start()
+CLIENT.close()
