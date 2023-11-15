@@ -13,7 +13,7 @@ connections=[]
 addresses={}
 
 def handle_client(client):
-    
+    client.send(bytes("Welcome to the quiz!","utf8"))
 
 
     client.close()
@@ -28,7 +28,6 @@ def accepting_client_connections():
         client,client_address=SERVER.accept()
         
         print("Connection "+str(CURR_CLIENT_NO)+" : "+client_address[0])
-        client.send("Welcome to the quiz!".encode("utf-8"))
 
         addresses[client]=client_address
         client_handler_thr=threading.Thread(target=handle_client,args=(client,))

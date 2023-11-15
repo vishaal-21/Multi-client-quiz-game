@@ -1,6 +1,5 @@
 import tkinter
 from tkinter import messagebox,ttk
-import client
 
 window=None
 login_button=None
@@ -19,7 +18,6 @@ def on_select(event,combo):
     filename=f"{selected_item}.txt"
     print(f'Selected: {selected_item}')
     display_questions(filename)
-    client.CLIENT.send
 
 def clear_screen():
     for widget in frame.winfo_children():

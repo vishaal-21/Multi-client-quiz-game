@@ -4,6 +4,7 @@ from threading import Thread
 import time,sys,select
 import tkinter
 # import timer
+import client
 
 HOST=""
 global PORT
@@ -16,7 +17,8 @@ CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 CLIENT.connect((HOST,PORT))
 
 def start_game():
-    print("hello")
+    data=client.CLIENT.recv(1024).decode("utf8")
+    print(data)
 
 main.initialize()
 client_thread=Thread(target=start_game)
