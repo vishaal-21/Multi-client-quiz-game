@@ -17,8 +17,8 @@ df=pandas.read_excel("Questions.xlsx")
 # HOST=input("Enter Host address : ")
 # PORT=int(input("Enter port number : "))
 
-# CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-# CLIENT.connect((HOST,PORT))
+CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+CLIENT.connect((HOST,PORT))
 
 def next_question(question_number_label,question_label,questions):
     global question_number,remaining_time
@@ -128,6 +128,7 @@ def on_select(combo):
     selected_item = combo.get()
     print(f'Selected Quiz: {selected_item}')
     questions_screen()
+    CLIENT.send(bytes(selected_item,"utf8"))
     df=obtain_question_list(selected_item)
 
 def clear_screen():
@@ -164,22 +165,44 @@ def login():
     username="user1"
     password="pass1"
     
-    # CLIENT.send(bytes(username,"utf8"))
+    credentials=f"{username}-{password}"
+    
+    CLIENT.send(bytes(credentials,"utf8"))
+    # time.sleep(0.1)
     # CLIENT.send(bytes(password,"utf8"))
 
-    with open('Credentials.txt', 'r') as file:
-        lines = file.readlines()
+    # with open('Credentials.txt', 'r') as file:
+    #     lines = file.readlines()
 
-        for line in lines:
-            st_username, st_password = line.strip().split('-')
+    #     for line in lines:
+    #         st_username, st_password = line.strip().split('-')
 
-            if username == st_username.strip() and password == st_password.strip():
-                messagebox.showinfo(title="Login Success", message="You successfully logged in.")
-                select_genre()
-            # else:
-            #     messagebox.showerror(title="Error", message="Invalid login.")
-            #     break
+    #         if username == st_username.strip() and password == st_password.strip():
+    #             messagebox.showinfo(title="Login Success", message="You successfully logged in.")
+    #             select_genre()
+    #         # else:
+    #         #     messagebox.showerror(title="Error", message="Invalid login.")
+    #         #     break
+    
+    data=CLIENT.recv(1024).decode("utf8")
+    # print(data)
+    # print(type(data))
+    
+    if data=="1":
+        messagebox.showinfo(title="Login Success", message="You successfully logged in.")
+        select_genre()
+    elif data=="0":
+        messagebox.showerror(title="Error", message="Invalid login.")
         
+
+
+def start_game():
+    data=CLIENT.recv(1024).decode("utf8")
+    print(data)
+
+client_thread=Thread(target=start_game)
+client_thread.start()
+
 window = tkinter.Tk()
 window.title("Login Form")
 window.geometry("800x600")
@@ -214,10 +237,4 @@ login_button.bind("<Leave>", on_leave)
 frame.pack()
 window.mainloop()
 
-# def start_game():
-#     data=CLIENT.recv(1024).decode("utf8")
-#     print(data)
-
-# client_thread=Thread(target=start_game)
-# client_thread.start()
-# CLIENT.close()
+CLIENT.close()
