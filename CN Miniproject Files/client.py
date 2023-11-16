@@ -20,52 +20,13 @@ df=pandas.read_excel("Questions.xlsx")
 CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 CLIENT.connect((HOST,PORT))
 
-def next_question(question_number_label,question_label,questions):
+def next_question(question_number_label,question_label):
     global question_number,remaining_time
-    index_iterator=iter(questions.index)
     
     remaining_time=11
 
     question_number += 1
     question_number_label.config(text=f"Question {question_number}")
-    
-    # print(questions)
-    
-    current_index = next(index_iterator)
-    
-    # print(current_index)
-    
-    question = questions.loc[current_index, 'Question']
-    
-    # print(question)
-    question_label.config(text=question)
-    
-    next_question_button = tkinter.Button(frame, bg="#80ffdb", text="Next Question", font=('Helvetica', 16), borderwidth=1, relief="solid",padx=10,pady=10,command=lambda: next_question(question_number_label,question_label,questions))
-    next_question_button.grid(row=6, column=0, pady=10)
-    
-    print(questions)
-    
-    # options=questions[["Option 1","Option 2","Option 3","Option 4"]]
-            
-    radiobutton = tkinter.IntVar()
-    
-    radiobutton_a = tkinter.Radiobutton(frame, bg="#a2d2ff",text="I agree to the terms and conditions", font=("Georgia", 10), variable=radiobutton)
-    radiobutton_a.grid(row=2, column=1,sticky="news", padx=10,pady=10)
-    
-    # checkbox_b = tkinter.IntVar()
-    radiobutton_b = tkinter.Radiobutton(frame, bg="#a2d2ff",text="I agree to the terms and conditions", font=("Georgia", 10), variable=radiobutton)
-    radiobutton_b.grid(row=2, column=4,sticky="news", padx=10,pady=10)
-    
-    # checkbox_c = tkinter.IntVar()
-    radiobutton_c = tkinter.Radiobutton(frame, bg="#a2d2ff",text="I agree to the terms and conditions", font=("Georgia", 10), variable=radiobutton)
-    radiobutton_c.grid(row=3, column=1,sticky="news", padx=10,pady=10)
-    
-    # checkbox_d = tkinter.IntVar()
-    radiobutton_d = tkinter.Radiobutton(frame, bg="#a2d2ff",text="I agree to the terms and conditions", font=("Georgia", 10), variable=radiobutton)
-    radiobutton_d.grid(row=3, column=4,sticky="news", padx=10,pady=10)
-
-    
-    # print(option)
         
 def obtain_question_list(sheet_name):
     df = pandas.read_excel('Questions.xlsx', sheet_name=sheet_name)
@@ -96,25 +57,49 @@ def questions_screen():
     timer_label.grid(sticky="e",row=0,column=4,padx=20,pady=20)
     
     frame.grid_columnconfigure(0, weight=2)
-    frame.grid_columnconfigure(4, minsize=100, weight=0)
+    frame.grid_columnconfigure(4, minsize=300, weight=0)
 
     frame.pack_propagate(False)
     frame.pack(fill="both",expand=True)
     
-    questions=df.sample(n=6)
+    print("Questions from server")
+    # for i in range(0,5,1):
+    question=CLIENT.recv(4096).decode("utf8")
     
-    question_label = tkinter.Label(frame, bg="#a2d2ff", text="", font=('Helvetica', 20), padx=20,pady=20, wraplength=700)
+    print(f"Combined: {question}")
+    question,option_1,option_2,option_3,option_4,answer = question.split("|")
+    print(f"{option_1} , {option_2} , {option_3} , {option_4}")
+    
+    question_label = tkinter.Label(frame, bg="#a2d2ff", text=question, font=('Helvetica', 20), padx=20,pady=20, wraplength=700)
     question_label.grid(row=1, column=0, columnspan=6, sticky="news",pady=10,padx=10)
     
-    next_question(question_number_label,question_label,questions)
-    
-    # for row in questions.itertuples(index=False):
-    #     question_label.config(text=f"{row.Question}")
+    if option_1=="nan":
+        answer_label = tkinter.Label(frame, text="Type Answer", bg='#a2d2ff', fg="#000000", font=("Georgia", 16))
+        answer_entry = tkinter.Entry(frame, font=("Arial", 16))
+        answer_label.grid(row=2, column=0)
+        answer_entry.grid(row=2, column=1, pady=20)
+    else:
+        button_a = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_1}", font=("Georgia", 12))
+        button_a.grid(row=2, column=1,sticky="news", padx=10,pady=10)
         
-    #     next_question_button = tkinter.Button(frame, bg="#80ffdb", text="Next Question", font=('Helvetica', 16), borderwidth=1, relief="solid",padx=10,pady=10,command=lambda: next_question(question_number_label))
-    #     next_question_button.grid(row=6, column=0, pady=10)
+        button_b = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_2}", font=("Georgia", 12))
+        button_b.grid(row=2, column=4,sticky="news", padx=10,pady=10)
+        
+        button_c = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_3}", font=("Georgia", 12))
+        button_c.grid(row=3, column=1,sticky="news", padx=10,pady=10)
+        
+        button_d = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_4}", font=("Georgia", 12))
+        button_d.grid(row=3, column=4,sticky="news", padx=10,pady=10)
+        
+        answer_label = tkinter.Label(frame, text="Enter answer", bg='#a2d2ff', fg="#000000", font=("Georgia", 16))
+        answer_entry = tkinter.Entry(frame, font=("Arial", 16))
+        answer_label.grid(row=4, column=0)
+        answer_entry.grid(row=4, column=1, pady=20)
+        
+    next_question_button = tkinter.Button(frame, bg="#80ffdb", text="Next Question", font=('Helvetica', 16), borderwidth=1, relief="solid",padx=10,pady=10,command=lambda: next_question(question_number_label,question_label))
+    next_question_button.grid(row=6, column=0, pady=10)
     
-    #     print(f"Question: {row.Question}, Answer: {row.Answer}")
+    next_question(question_number_label,question_label)
         
     update_timer(timer_label)
     
@@ -125,11 +110,11 @@ def questions_screen():
 def on_select(combo):
     global df
     
-    selected_item = combo.get()
+    selected_item = combo.get() 
     print(f'Selected Quiz: {selected_item}')
-    questions_screen()
     CLIENT.send(bytes(selected_item,"utf8"))
-    df=obtain_question_list(selected_item)
+    questions_screen()
+    # df=obtain_question_list(selected_item)
 
 def clear_screen():
     for widget in frame.winfo_children():
@@ -168,25 +153,8 @@ def login():
     credentials=f"{username}-{password}"
     
     CLIENT.send(bytes(credentials,"utf8"))
-    # time.sleep(0.1)
-    # CLIENT.send(bytes(password,"utf8"))
-
-    # with open('Credentials.txt', 'r') as file:
-    #     lines = file.readlines()
-
-    #     for line in lines:
-    #         st_username, st_password = line.strip().split('-')
-
-    #         if username == st_username.strip() and password == st_password.strip():
-    #             messagebox.showinfo(title="Login Success", message="You successfully logged in.")
-    #             select_genre()
-    #         # else:
-    #         #     messagebox.showerror(title="Error", message="Invalid login.")
-    #         #     break
     
     data=CLIENT.recv(1024).decode("utf8")
-    # print(data)
-    # print(type(data))
     
     if data=="1":
         messagebox.showinfo(title="Login Success", message="You successfully logged in.")
