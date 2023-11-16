@@ -1,11 +1,39 @@
 import tkinter
 from tkinter import messagebox,ttk
 
-window=None
-login_button=None
-frame=None
-username_entry=None
-password_entry=None
+window = tkinter.Tk()
+window.title("Login Form")
+window.geometry('500x500')
+window.configure(bg='#9D9D9D')
+
+frame = tkinter.Frame(bg='#9D9D9D')
+
+login_label = tkinter.Label(
+    frame, text="Login", bg='#9D9D9D', fg="#170F11", font=("Times New Roman", 30))
+
+username_label = tkinter.Label(
+    frame, text="Username", bg='#9D9D9D', fg="#FFFFFF", font=("Georgia", 16))
+
+username_entry = tkinter.Entry(frame, font=("Arial", 16))
+password_entry = tkinter.Entry(frame, show="*", font=("Arial", 16))
+password_label = tkinter.Label(
+    frame, text="Password", bg='#9D9D9D', fg="#FFFFFF", font=("Georgia", 16))
+
+login_button = tkinter.Button(
+    frame, text="Login", bg="#170F11", fg="#FFFFFF", font=("Georgia", 16), command=login)
+
+login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=60)
+username_label.grid(row=1, column=0)
+username_entry.grid(row=1, column=1, pady=20)
+password_label.grid(row=2, column=0)
+password_entry.grid(row=2, column=1, pady=20)
+login_button.grid(row=3, column=0, columnspan=2, pady=30)
+
+login_button.bind("<Enter>", on_enter)
+login_button.bind("<Leave>", on_leave)
+
+frame.pack()
+window.mainloop()
 
 def display_questions(filename):
     clear_screen()
@@ -63,39 +91,3 @@ def login():
                 select_genre()
 
         messagebox.showerror(title="Error", message="Invalid login.")
-
-
-def initialize():
-    window = tkinter.Tk()
-    window.title("Login Form")
-    window.geometry('500x500')
-    window.configure(bg='#9D9D9D')
-
-    frame = tkinter.Frame(bg='#9D9D9D')
-
-    login_label = tkinter.Label(
-        frame, text="Login", bg='#9D9D9D', fg="#170F11", font=("Times New Roman", 30))
-
-    username_label = tkinter.Label(
-        frame, text="Username", bg='#9D9D9D', fg="#FFFFFF", font=("Georgia", 16))
-
-    username_entry = tkinter.Entry(frame, font=("Arial", 16))
-    password_entry = tkinter.Entry(frame, show="*", font=("Arial", 16))
-    password_label = tkinter.Label(
-        frame, text="Password", bg='#9D9D9D', fg="#FFFFFF", font=("Georgia", 16))
-
-    login_button = tkinter.Button(
-        frame, text="Login", bg="#170F11", fg="#FFFFFF", font=("Georgia", 16), command=login)
-
-    login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=60)
-    username_label.grid(row=1, column=0)
-    username_entry.grid(row=1, column=1, pady=20)
-    password_label.grid(row=2, column=0)
-    password_entry.grid(row=2, column=1, pady=20)
-    login_button.grid(row=3, column=0, columnspan=2, pady=30)
-
-    login_button.bind("<Enter>", on_enter)
-    login_button.bind("<Leave>", on_leave)
-
-    frame.pack()
-    window.mainloop()

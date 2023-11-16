@@ -2,7 +2,7 @@ import socket
 import threading
 import time
 
-HOST="127.0.0.1"
+HOST="10.86.3.121"
 PORT=8080
 BUFFERSIZE=1024
 CURR_CLIENT_NO = 0
@@ -14,9 +14,9 @@ addresses={}
 
 def handle_client(client):
     client.send(bytes("Welcome to the quiz!","utf8"))
-
-
-    client.close()
+    
+    # username=client.recv(1024).decode("utf8")
+    # password=client.recv(1024).decode("utf8")
     
 
 def accepting_client_connections():
@@ -44,6 +44,8 @@ def Main():
     SERVER.listen(TOT_CLIENT_NO)
     
     accepting_client_connections()
+    
+    SERVER.close()
     
 if __name__ == '__main__':
     Main()
