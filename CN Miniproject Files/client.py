@@ -9,7 +9,7 @@ HOST="10.86.3.121"
 PORT=8080
 BUFFERSIZE=4096
 
-remaining_time = 10
+remaining_time = 60
 question_number = 0
 
 df=pandas.read_excel("Questions.xlsx")
@@ -20,17 +20,40 @@ df=pandas.read_excel("Questions.xlsx")
 CLIENT = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 CLIENT.connect((HOST,PORT))
 
-def next_question(question_number_label,question_label):
+def next_question(question_number_label,question_label,button_a,button_b,button_c,button_d,answer_entry):
     global question_number,remaining_time
     
-    remaining_time=11
+    remaining_time=60
+    
 
     question_number += 1
     question_number_label.config(text=f"Question {question_number}")
+    
+    answer=answer_entry.get()
+    print(f"Your answered : {answer}")
+    CLIENT.send(bytes(answer,"utf8"))
+    
+    question=CLIENT.recv(256).decode("utf8")
+    # print(f"Combined: {question}")
+    question,option_1,option_2,option_3,option_4,answer = question.split("|")
+    print(f"Question : {question}")
+    # print(f"{question} , {option_1} , {option_2} , {option_3} , {option_4} , {answer}")
+    
+    question_label.config(text=question)
+    
+    if option_2=="nan":
+        pass
+    else:
+        button_a.config(text=option_1)
+        button_b.config(text=option_2)
+        button_c.config(text=option_3)
+        button_d.config(text=option_4)
         
-def obtain_question_list(sheet_name):
-    df = pandas.read_excel('Questions.xlsx', sheet_name=sheet_name)
-    return df
+    answer_entry.delete(0,tkinter.END)
+        
+    next_question_button = tkinter.Button(frame, bg="#80ffdb", text="Next Question", font=('Helvetica', 16), borderwidth=1, relief="solid",padx=10,pady=10,command=lambda: next_question(question_number_label,question_label,button_a,button_b,button_c,button_d,answer_entry))
+    next_question_button.grid(row=6, column=0, pady=10)
+    window.update_idletasks()
 
 def update_timer(timer_label):
     global remaining_time
@@ -55,6 +78,7 @@ def questions_screen():
 
     timer_label = tkinter.Label(frame, bg="#80ffdb",text="Time Remaining: 60 seconds", font=('Helvetica', 16), borderwidth=2, relief="sunken",padx=15,pady=15)
     timer_label.grid(sticky="e",row=0,column=4,padx=20,pady=20)
+    update_timer(timer_label)
     
     frame.grid_columnconfigure(0, weight=2)
     frame.grid_columnconfigure(4, minsize=300, weight=0)
@@ -62,16 +86,18 @@ def questions_screen():
     frame.pack_propagate(False)
     frame.pack(fill="both",expand=True)
     
-    print("Questions from server")
-    # for i in range(0,5,1):
-    question=CLIENT.recv(4096).decode("utf8")
-    
-    print(f"Combined: {question}")
-    question,option_1,option_2,option_3,option_4,answer = question.split("|")
-    print(f"{option_1} , {option_2} , {option_3} , {option_4}")
-    
-    question_label = tkinter.Label(frame, bg="#a2d2ff", text=question, font=('Helvetica', 20), padx=20,pady=20, wraplength=700)
+    question_label = tkinter.Label(frame, bg="#a2d2ff", text="", font=('Helvetica', 20), padx=20,pady=20, wraplength=700)
     question_label.grid(row=1, column=0, columnspan=6, sticky="news",pady=10,padx=10)
+    
+    print("Questions from server")
+    # for i in range(0,6,1):
+    question=CLIENT.recv(256).decode("utf8")
+    
+    # print(f"Combined: {question}")
+    question,option_1,option_2,option_3,option_4,answer = question.split("|")
+    print(f"Question : {question}")
+    
+    question_label.config(text=question)
     
     if option_1=="nan":
         answer_label = tkinter.Label(frame, text="Type Answer", bg='#a2d2ff', fg="#000000", font=("Georgia", 16))
@@ -79,16 +105,16 @@ def questions_screen():
         answer_label.grid(row=2, column=0)
         answer_entry.grid(row=2, column=1, pady=20)
     else:
-        button_a = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_1}", font=("Georgia", 12))
+        button_a = tkinter.Button(frame, bg="#a2d2ff",text=option_1, font=("Georgia", 12))
         button_a.grid(row=2, column=1,sticky="news", padx=10,pady=10)
         
-        button_b = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_2}", font=("Georgia", 12))
+        button_b = tkinter.Button(frame, bg="#a2d2ff",text=option_2, font=("Georgia", 12))
         button_b.grid(row=2, column=4,sticky="news", padx=10,pady=10)
         
-        button_c = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_3}", font=("Georgia", 12))
+        button_c = tkinter.Button(frame, bg="#a2d2ff",text=option_3, font=("Georgia", 12))
         button_c.grid(row=3, column=1,sticky="news", padx=10,pady=10)
         
-        button_d = tkinter.Button(frame, bg="#a2d2ff",text=f"{option_4}", font=("Georgia", 12))
+        button_d = tkinter.Button(frame, bg="#a2d2ff",text=option_4, font=("Georgia", 12))
         button_d.grid(row=3, column=4,sticky="news", padx=10,pady=10)
         
         answer_label = tkinter.Label(frame, text="Enter answer", bg='#a2d2ff', fg="#000000", font=("Georgia", 16))
@@ -96,16 +122,11 @@ def questions_screen():
         answer_label.grid(row=4, column=0)
         answer_entry.grid(row=4, column=1, pady=20)
         
-    next_question_button = tkinter.Button(frame, bg="#80ffdb", text="Next Question", font=('Helvetica', 16), borderwidth=1, relief="solid",padx=10,pady=10,command=lambda: next_question(question_number_label,question_label))
+    next_question_button = tkinter.Button(frame, bg="#80ffdb", text="Next Question", font=('Helvetica', 16), borderwidth=1, relief="solid",padx=10,pady=10,command=lambda: next_question(question_number_label,question_label,button_a,button_b,button_c,button_d,answer_entry))
     next_question_button.grid(row=6, column=0, pady=10)
     
-    next_question(question_number_label,question_label)
+    window.update_idletasks()
         
-    update_timer(timer_label)
-    
-    
-
-# ===========================================================================
 
 def on_select(combo):
     global df
@@ -114,7 +135,6 @@ def on_select(combo):
     print(f'Selected Quiz: {selected_item}')
     CLIENT.send(bytes(selected_item,"utf8"))
     questions_screen()
-    # df=obtain_question_list(selected_item)
 
 def clear_screen():
     for widget in frame.winfo_children():

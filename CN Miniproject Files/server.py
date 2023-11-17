@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import pandas
+import sys
 
 HOST="10.86.3.121"
 PORT=8080
@@ -14,39 +15,45 @@ connections=[]
 addresses={}
 
 df=pandas.read_excel("Questions.xlsx")
+score=0
 
 def select_questions(sheet_name,client):
-    global df,questions
+    global df,questions,score
     
     df=pandas.read_excel("Questions.xlsx",sheet_name=sheet_name)
-    # print(df)
     
-    questions=df.sample(n=6)
-    print(questions)
+    subset=df.sample(n=6)
     
-    for row in questions.itertuples(index=False):
-        print(f"Question : {row.Question}")
-        # client.send(bytes(str(row.Question),"utf8"))
+    questions=subset["Question"].values
+    option_1=subset["Option_1"].values
+    option_2=subset["Option_2"].values
+    option_3=subset["Option_3"].values
+    option_4=subset["Option_4"].values
+    answer=subset["Answer"].values
+    
+    for i in range(0,len(questions),1):
+        print(f"Question : {questions[i]}")
         
-        print(f"Option 1 : {row.Option_1}")
-        # client.send(bytes(str(row.Option_1),"utf8"))
+        print(f"Option 1 : {option_1[i]}")
         
-        print(f"Option 2 : {row.Option_2}")
-        # client.send(bytes(str(row.Option_2),"utf8"))
+        print(f"Option 2 : {option_2[i]}")
         
-        print(f"Option 3 : {row.Option_3}")
-        # client.send(bytes(str(row.Option_3),"utf8"))
+        print(f"Option 3 : {option_3[i]}")
         
-        print(f"Option 4 : {row.Option_4}")
-        # client.send(bytes(str(row.Option_4),"utf8"))
+        print(f"Option 4 : {option_4[i]}")
         
-        print(f"Answer : {row.Answer}")
+        print(f"Answer : {answer[i]}")
         
-        combined=f"{row.Question}|{row.Option_1}|{row.Option_2}|{row.Option_3}|{row.Option_4}|{row.Answer}"
+        combined=f"{questions[i]}|{option_1[i]}|{option_2[i]}|{option_3[i]}|{option_4[i]}|{answer[i]}"
         print(f"Combined :{combined}")
+        
         client.send(bytes(combined,"utf8"))
         
-        client.recv(1024).decode("utf8")
+        user_answer = client.recv(128).decode("utf8")
+        
+        if user_answer == answer[i]:
+            score+=1
+            print(f"Score : {score}")
     
 
 def credential_check(credentials):
